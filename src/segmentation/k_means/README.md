@@ -19,5 +19,5 @@ The algorithm proceeds as follows:
  - Repeat until convergence:
     * For each point `xᵢ` ∈ `X`
         * Assign `xᵢ` to centroid `cⱼ` ∈ `C`, such that `cⱼ` is found using `argmin(j) Dist(xᵢ, cⱼ)`
-    * For each centroid `cⱼ` ∈ `C`
+    * For each centroid `cⱼ` ∈ `C`:
         * Set `cⱼ` equal to the mean of all points assigned to `cⱼ`

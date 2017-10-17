@@ -6,6 +6,17 @@ from sklearn.cluster import KMeans as _KMeans
 import matplotlib.pyplot as plt
 
 
+def setup():
+    try:
+        k = int(input('Enter the k value.\n'))
+        if k < 1:
+            raise ValueError()
+        return KMeans('img/river.jpg', k)
+    except:
+        print('Please enter a positive integer.')
+        setup()
+
+
 class KMeans:
     """
     K-Means.
@@ -51,20 +62,24 @@ class KMeans:
             labels.append(distances.index(min(distances)))
         return labels
 
-    def _generate_centroids(self, labels):
+    def _generate_centroids(self, labels, prev_centroids):
         centroids = []
         for i in range(self.k):
             pixels_for_centroid = list(map(
                 lambda x: x[0],
                 filter(lambda x: x[1] == i, zip(self.pixels, labels))))
-            centroids.append(float(
-                sum(pixels_for_centroid) / len(pixels_for_centroid)))
+            length = len(pixels_for_centroid)
+            if length == 0:
+                centroids.append(prev_centroids[i])
+            else:
+                centroids.append(float(
+                    sum(pixels_for_centroid) / len(pixels_for_centroid)))
         return centroids
 
     def _amplify_pixels(self, pixels):
         return list(map(lambda x: x * 255 / (self.k-1), pixels))
 
-    def run(self, threshold=1, print_iter=False):
+    def run(self, threshold=1, print_iter=False, save_result=False):
         """
         For simplicity, this implementation will only deal with greyscale
         images.
@@ -93,16 +108,18 @@ class KMeans:
             labels = self._assign_pixel_labels(self.pixels, centroids)
             # (Step 3)
             # Update each centroid to the mean of pixels labeled to it.
-            centroids = self._generate_centroids(labels)
+            centroids = self._generate_centroids(labels, prev_centroids)
             if print_iter:
                 print('centroids', centroids, 'prev', prev_centroids)
         # At this point the centroids have stabilised to a point satisfying
         # `threshold`.
         if print_iter:
             print('Converged (t={})\n'.format(threshold), centroids)
+        if save_result:
+            self.save_result(labels)
         return labels, centroids
 
-    def print_result(self, labels):
+    def save_result(self, labels):
         w, h = self.im.size
         adjusted_labels = self._amplify_pixels(labels)
         image = [adjusted_labels[i:i + w] for i in range(0, len(adjusted_labels), w)]
