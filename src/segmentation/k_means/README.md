@@ -17,7 +17,7 @@ The algorithm proceeds as follows:
  - For inputs `X : list of points`, `k : number of clusters`
  - Let `C` be `k` centroids, placed at random locations
  - Repeat until convergence:
-    * For each point `x<sub>i</sub>` ∈ `X`
-        * Assign `xi` to the nearest centroid `c<sub>j</sub>`, where `c<sub>j</sub>` is found by `argmin(j) Dist(x<sub>i</sub>, c<sub>j</sub>)`
-    * For each centroid `c<sub>j</sub>` ∈ `C`
-        * Set `c<sub>j</sub>` equal to the mean of all points assigned to `c<sub>j</sub>`
+    * For each point `xᵢ` ∈ `X`
+        * Assign `xᵢ` to centroid `cⱼ` ∈ `C`, such that `cⱼ` is found using `argmin(j) Dist(xᵢ, cⱼ)`
+    * For each centroid `cⱼ` ∈ `C`
+        * Set `cⱼ` equal to the mean of all points assigned to `cⱼ`
