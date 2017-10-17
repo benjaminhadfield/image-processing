@@ -9,7 +9,7 @@ data based on their proximity to the centroid of clusters.
 The type of the implemented algorithm is
 
 ```
-kmeans :: [Num] -> Num -> ( [Num], [(Fractional, Fractional)] )
+kmeans :: [Num] -> Num -> ([Num], [Fractional])
 ```
 
 The algorithm proceeds as follows:
