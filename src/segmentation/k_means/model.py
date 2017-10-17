@@ -55,8 +55,8 @@ class KMeans:
         # one-dimensional scalars representing pixel intensity.
         # If this implementation dealt with RGB images, then each centroid would
         # have three dimensions, one for each channel.
-        centres = list(map(lambda v: math.floor(v * 255), np.random.rand(self.k)))
-        labelled_pixels = self._assign_pixel_labels(self.pixels, centres)
+        centroids = list(map(lambda v: math.floor(v * 255), np.random.rand(self.k)))
+        labelled_pixels = self._assign_pixel_labels(self.pixels, centroids)
         labelled_pixels = self._amplify_pixels(labelled_pixels, self.k)
         self.result.putdata(labelled_pixels)
         return self
