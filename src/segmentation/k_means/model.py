@@ -1,20 +1,16 @@
-import math
-
 from PIL import Image
 import numpy as np
-from sklearn.cluster import KMeans as _KMeans
-import matplotlib.pyplot as plt
+
+from src.utils.validation import is_gt, is_int
 
 
 def setup():
     try:
         k = int(input('Enter the k value.\n'))
-        if k < 1:
-            raise ValueError()
         return KMeans('img/river.jpg', k)
-    except:
+    except ValueError:
         print('Please enter a positive integer.')
-        setup()
+        return setup()
 
 
 class KMeans:
@@ -22,17 +18,23 @@ class KMeans:
     K-Means.
     For simplicity images used are converted to greyscale.
     """
-    def __init__(self, image, k=2):
+    def __init__(self, image, k=2, t=1):
         """
         :param k: Number of clusters.
         """
         self.k = k
+        self.t = t
+        self._validate_input_args()
+
         self.im = Image.open(image).convert('L')
         self.pixels = self.im.getdata()
         self.histogram = self.im.histogram()
 
-    @staticmethod
-    def _lists_equal(a, b, threshold=1):
+    def _validate_input_args(self):
+        _ = is_int(self.k)
+        _ = is_gt(self.k, self.t, threshold=0)
+
+    def _lists_equal(self, a, b):
         """
         Takes two lists of equal length, and returns true if each zipped pair
         is at most `threshold` apart.
@@ -43,7 +45,7 @@ class KMeans:
         """
         if len(a) != len(b):
             raise ValueError('Both lists must have the same length.')
-        checks = map(lambda x: abs(x[0] - x[1]) <= threshold, zip(a, b))
+        checks = map(lambda x: abs(x[0] - x[1]) <= self.t, zip(a, b))
         return all(checks)
 
     @staticmethod
@@ -79,7 +81,7 @@ class KMeans:
     def _amplify_pixels(self, pixels):
         return list(map(lambda x: x * 255 / (self.k-1), pixels))
 
-    def run(self, threshold=1, print_iter=False, save_result=False):
+    def run(self, print_iter=False, save_result=False):
         """
         For simplicity, this implementation will only deal with greyscale
         images.
@@ -92,16 +94,13 @@ class KMeans:
         # If this implementation dealt with RGB images, then each centroid would
         # have three dimensions, one for each channel.
         labels = []
-        centroids = list(map(
-            lambda v: math.floor(v * 255), np.random.rand(self.k)))
-        # Sort so centroids for higher intensity have higher index.
-        centroids.sort()
+        centroids = [i * (255 / self.k) for i in range(self.k)]
         prev_centroids = None
         if print_iter:
             print('starting centroids', centroids)
         # Repeat until convergence
         while not prev_centroids \
-                or not self._lists_equal(centroids, prev_centroids, threshold):
+                or not self._lists_equal(centroids, prev_centroids):
             prev_centroids = centroids
             # (Step 2)
             # Label each pixel with the index of the closes centroid.
@@ -114,7 +113,7 @@ class KMeans:
         # At this point the centroids have stabilised to a point satisfying
         # `threshold`.
         if print_iter:
-            print('Converged (t={})\n'.format(threshold), centroids)
+            print('Converged (t={})\n'.format(self.t), centroids)
         if save_result:
             self.save_result(labels)
         return labels, centroids

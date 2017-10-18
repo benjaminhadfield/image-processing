@@ -458,5 +458,6 @@ pyvenv.cfg
 .venv
 pip-selfcheck.json
 
-/img/out
-/img/out/*
+# Img dir
+img/*
+!img/river.jpg

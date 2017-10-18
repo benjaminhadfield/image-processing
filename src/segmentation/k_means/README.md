@@ -1,5 +1,9 @@
 # K-Means
 
+| Type |
+| ---- |
+| Statistical |
+
 K-Means is an unsupervised method for assigning discrete labels to unstructured
 data based on their proximity to the centroid of clusters.
 
