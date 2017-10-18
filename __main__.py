@@ -1,14 +1,16 @@
 from src.segmentation.k_means.model import setup as k_setup
 
 
-def run_model(models):
-    model_name = input('What model would you like to use?\n')
+def run_model(options):
+    model_names = [' - {}\n'.format(name) for name in options.keys()]
+    selected = input('Which model would you like to use?\nOptions are:\n{}'
+                     .format(*model_names))
     try:
-        return models[model_name]().run(save_result=True)
+        return options[selected]().run()
     except KeyError:
-        print('Model \'{0}\' was not found. Please enter one of:\n{1}'.format(
-            model_name, *['\t- {}\n'.format(name) for name in models.keys()]))
-        return run_model(models)
+        print('Model \'{0}\' was not found. Please try a different model.'
+              .format(selected))
+        return run_model(options)
 
 
 if __name__ == '__main__':
@@ -17,6 +19,3 @@ if __name__ == '__main__':
     }
 
     _ = run_model(models)
-
-
-
