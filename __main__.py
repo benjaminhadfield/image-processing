@@ -1,7 +1,8 @@
 from termcolor import colored, cprint
 
-from src.segmentation.k_means.model import setup as k_setup
-from src.segmentation.merging.model import setup as m_setup
+from src.segmentation.k_means.model import KMeans
+from src.segmentation.merging.model import Merging
+from src.transformation.histogram_equalisation.model import HistogramEqualiser
 
 
 def run_model(options):
@@ -20,8 +21,9 @@ def run_model(options):
 
 if __name__ == '__main__':
     models = {
-        'k-means': k_setup,
-        'merging': m_setup,
+        'k-means': KMeans.setup,
+        'merging': Merging.setup,
+        'hist-eq': HistogramEqualiser.setup,
     }
 
     _ = run_model(models)

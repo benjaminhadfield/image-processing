@@ -1,34 +1,30 @@
 from PIL import Image
 import numpy as np
 
+from src.utils.models import ImageModel
 from src.utils.validation import is_gt, is_int
 
 
-def setup():
-    try:
-        k = int(input('Enter the k value.\n'))
-        return KMeans('img/river.jpg', k)
-    except ValueError:
-        print('Please enter a positive integer.')
-        return setup()
-
-
-class KMeans:
+class KMeans(ImageModel):
     """
     K-Means.
     For simplicity images used are converted to greyscale.
     """
     def __init__(self, image, k=2, t=1):
-        """
-        :param k: Number of clusters.
-        """
+        super().__init__(image)
+
         self.k = k
         self.t = t
         self._validate_input_args()
 
-        self.im = Image.open(image).convert('L')
-        self.pixels = self.im.getdata()
-        self.histogram = self.im.histogram()
+    @staticmethod
+    def setup():
+        try:
+            k = int(input('Enter the k value.\n'))
+            return KMeans('img/river.jpg', k)
+        except ValueError:
+            print('Please enter a positive integer.')
+            return KMeans.setup()
 
     def _validate_input_args(self):
         _ = is_int(self.k)
@@ -65,11 +61,12 @@ class KMeans:
         return labels
 
     def _generate_centroids(self, labels, prev_centroids):
+        pixels = self.im.getdata()
         centroids = []
         for i in range(self.k):
             pixels_for_centroid = list(map(
                 lambda x: x[0],
-                filter(lambda x: x[1] == i, zip(self.pixels, labels))))
+                filter(lambda x: x[1] == i, zip(pixels, labels))))
             length = len(pixels_for_centroid)
             if length == 0:
                 centroids.append(prev_centroids[i])
@@ -88,12 +85,13 @@ class KMeans:
         :return: [c, l] - array (len k) of centroid coords, array of size of
         input image containing pixel labels.
         """
+        pixels = self.im.getdata()
+        labels = []
         # (Step 1)
         # Select random starting centroids. These centroids are simple
         # one-dimensional scalars representing pixel intensity.
         # If this implementation dealt with RGB images, then each centroid would
         # have three dimensions, one for each channel.
-        labels = []
         centroids = [i * (255 / self.k) for i in range(self.k)]
         prev_centroids = None
         if print_iter:
@@ -104,7 +102,7 @@ class KMeans:
             prev_centroids = centroids
             # (Step 2)
             # Label each pixel with the index of the closes centroid.
-            labels = self._assign_pixel_labels(self.pixels, centroids)
+            labels = self._assign_pixel_labels(pixels, centroids)
             # (Step 3)
             # Update each centroid to the mean of pixels labeled to it.
             centroids = self._generate_centroids(labels, prev_centroids)
