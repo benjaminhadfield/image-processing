@@ -10,25 +10,20 @@ class KMeans(ImageModel):
     K-Means.
     For simplicity images used are converted to greyscale.
     """
-    def __init__(self, image, k=2, t=1):
-        super().__init__(image)
-
+    def __init__(self, k=2, *args, **kwargs):
+        super().__init__(*args, **kwargs)
         self.k = k
-        self.t = t
-        self._validate_input_args()
+        self.t = 1
 
     @staticmethod
     def setup():
         try:
             k = int(input('Enter the k value.\n'))
-            return KMeans('img/river.jpg', k)
+            _ = is_gt(k, threshold=0)
+            return KMeans(k, image='img/river.jpg')
         except ValueError:
             print('Please enter a positive integer.')
             return KMeans.setup()
-
-    def _validate_input_args(self):
-        _ = is_int(self.k)
-        _ = is_gt(self.k, self.t, threshold=0)
 
     def _lists_equal(self, a, b):
         """
@@ -37,7 +32,7 @@ class KMeans(ImageModel):
         e.g. ([1.2, 10.5], [1.5, 12], 1) would check
             - abs(1.2 - 1.5) < 1
             - abs(10.5 - 12) < 1
-        and return the AND of each check.
+        returning the AND of each check.
         """
         if len(a) != len(b):
             raise ValueError('Both lists must have the same length.')
@@ -78,14 +73,7 @@ class KMeans(ImageModel):
     def _amplify_pixels(self, pixels):
         return list(map(lambda x: x * 255 / (self.k-1), pixels))
 
-    def run(self, print_iter=False, save_result=False):
-        """
-        For simplicity, this implementation will only deal with greyscale
-        images.
-        :return: [c, l] - array (len k) of centroid coords, array of size of
-        input image containing pixel labels.
-        """
-        pixels = self.im.getdata()
+    def run(self):
         labels = []
         # (Step 1)
         # Select random starting centroids. These centroids are simple
@@ -94,32 +82,18 @@ class KMeans(ImageModel):
         # have three dimensions, one for each channel.
         centroids = [i * (255 / self.k) for i in range(self.k)]
         prev_centroids = None
-        if print_iter:
-            print('starting centroids', centroids)
         # Repeat until convergence
         while not prev_centroids \
                 or not self._lists_equal(centroids, prev_centroids):
             prev_centroids = centroids
             # (Step 2)
             # Label each pixel with the index of the closes centroid.
-            labels = self._assign_pixel_labels(pixels, centroids)
+            labels = self._assign_pixel_labels(self.pixels, centroids)
             # (Step 3)
             # Update each centroid to the mean of pixels labeled to it.
             centroids = self._generate_centroids(labels, prev_centroids)
-            if print_iter:
-                print('centroids', centroids, 'prev', prev_centroids)
         # At this point the centroids have stabilised to a point satisfying
         # `threshold`.
-        if print_iter:
-            print('Converged (t={})\n'.format(self.t), centroids)
-        if save_result:
-            self.save_result(labels)
-        return labels, centroids
-
-    def save_result(self, labels):
-        w, h = self.im.size
-        adjusted_labels = self._amplify_pixels(labels)
-        image = [adjusted_labels[i:i + w] for i in range(0, len(adjusted_labels), w)]
-        arr = np.array(image, dtype=np.uint8)
-        out = Image.fromarray(arr)
-        out.save('img/out/k-means-{}.jpg'.format(self.k))
+        matrix = self.pixel_matrix(
+            self._amplify_pixels(labels), self.im.size)
+        return Image.fromarray(matrix)

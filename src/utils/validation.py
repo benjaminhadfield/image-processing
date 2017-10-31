@@ -4,7 +4,7 @@ def _throw_or_return(result, throw, error=ValueError):
     raises `error` if `throw` is `True`, else returns `False`.
     """
     if throw and not result:
-        raise ValueError()
+        raise error()
     return result
 
 
@@ -29,4 +29,9 @@ def is_int(*args, throw=True):
 def is_number(*args, throw=True):
     """Checks all args are instances of `int`, `float` or `complex`."""
     result = all([isinstance(test, (int, float, complex)) for test in args])
+    return _throw_or_return(result, throw)
+
+
+def is_odd(*args, throw=True):
+    result = all([test % 2 == 1 for test in args])
     return _throw_or_return(result, throw)
